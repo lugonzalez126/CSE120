@@ -1,0 +1,49 @@
+import pandas as pd
+import os
+
+# Function to calculate the overall average for each coordinate in specified columns
+def calculate_overall_averages(files, columns_to_read):
+    overall_averages = {}  # Use a dictionary to store averages by coordinate (row and column)
+
+    for file in files:
+        if not os.path.exists(file):
+            print(f"File {file} does not exist. Skipping.")
+            continue
+        
+        df = pd.read_csv(file)
+        
+        for row in range(df.shape[0]):
+            for col in columns_to_read:
+                if col < df.shape[1]:
+                    coordinate = (row, col)
+                    value = df.iloc[row, col]
+                    if coordinate in overall_averages:
+                        overall_averages[coordinate].append(value)
+                    else:
+                        overall_averages[coordinate] = [value]
+    
+    # Calculate the overall average for each coordinate
+    overall_averages_avg = {coord: sum(values) / len(values) for coord, values in overall_averages.items()}
+    
+    return overall_averages_avg
+
+# List of CSV files to process
+csv_files = ["Test2.csv", "Test6.csv"]
+
+# List of column indices to read (0-based index)
+columns_to_read = [1, 2, 3]  # Change this to the columns you want to read (2, 3, and 4)
+
+# Calculate the overall averages
+overall_averages = calculate_overall_averages(csv_files, columns_to_read)
+
+# Create a DataFrame from the averages
+averages_df = pd.DataFrame(list(overall_averages.values()), index=overall_averages.keys(), columns=['Average'])
+
+# Save the averages to a new CSV file
+averages_df.to_csv('averages.csv')
+print("Averages saved to 'averages.csv'")
+
+# Display the overall averages
+for coordinate, average in overall_averages.items():
+    row, col = coordinate
+    print(f"Row {row}, Column {col + 1} Average: {average:.2f}")
