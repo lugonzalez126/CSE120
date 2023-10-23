@@ -1,0 +1,51 @@
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+import pandas as pd
+
+# Load your data from a CSV file
+df = pd.read_csv('Test2.csv')  # Replace 'your_data.csv' with the actual file path
+
+# Create a Dash app
+app = dash.Dash(__name__)
+
+# Define the layout
+app.layout = html.Div([
+    dcc.Graph(id='time-series-plot'),
+    dcc.RangeSlider(
+    id='chrg-range',
+    min=int(df['time'].min()),  
+    max=int(df['time'].max()),  
+    step=1,
+    marks={i: str(i) for i in range(int(df['time'].min()), int(df['time'].max()) + 1)},  
+    value=[int(df['time'].min()), int(df['time'].max())] 
+)
+
+
+])
+
+# Define a callback to update the time series plot
+
+@app.callback(
+    Output('time-series-plot', 'figure'),  
+    [Input('chrg-range', 'value')] 
+)
+
+def update_time_series_plot(selected_range):
+    filtered_data = df[(df['time'] >= selected_range[0]) & (df['time'] <= selected_range[1])]
+    figure = {
+        'data': [
+            {'x': filtered_data['time'], 'y': filtered_data['mv'], 'type': 'line', 'name': 'mv'},
+            {'x': filtered_data['time'], 'y': filtered_data['chrg'], 'type': 'line', 'name': 'chrg'}
+        ],
+        'layout': {
+            'title': 'time Series Plot of mv and chrg',
+            'xaxis': {'title': 'time (your_units)'},
+            'yaxis': {'title': 'mv and chrg'}
+        }
+    }
+    return figure
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
