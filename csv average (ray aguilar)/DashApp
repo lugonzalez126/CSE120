@@ -5,12 +5,12 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 # Load your data from a CSV file
-df = pd.read_csv('Test2.csv')  # Replace 'your_data.csv' with the actual file path
+df = pd.read_csv('Test2.csv')
 
 # Create a Dash app
 app = dash.Dash(__name__)
 
-# Define the layout
+# the layout
 app.layout = html.Div([
     dcc.Graph(id='time-series-plot'),
     dcc.RangeSlider(
@@ -25,7 +25,7 @@ app.layout = html.Div([
 
 ])
 
-# Define a callback to update the time series plot
+#callback to update the time series plot
 
 @app.callback(
     Output('time-series-plot', 'figure'),  
