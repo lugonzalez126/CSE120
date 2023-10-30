@@ -12,13 +12,13 @@ class ExcelDataReader:
 
     def get_time_data(self):
         if hasattr(self, 'selected_columns'):
-            return self.selected_columns['time']
+            return self.selected_columns['SecondsSinceEpoch  (seconds)']
         else:
             raise ValueError("Columns not yet filtered. Call filter_columns method first.")
 
     def get_mv_data(self):
         if hasattr(self, 'selected_columns'):
-            return self.selected_columns['mv']
+            return self.selected_columns['BatteryStateOfCharge  (instantaneous, percent)']
         else:
             raise ValueError("Columns not yet filtered. Call filter_columns method first.")
 
