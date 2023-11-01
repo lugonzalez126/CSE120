@@ -1,0 +1,61 @@
+# necessary libraries
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+import pandas as pd
+import os
+
+# Load data from a CSV file
+df = pd.read_csv('Test2.csv')  
+
+# Converts millivolts (mv) to Volts (V)
+df['mv'] /= 1000
+
+# Converts time from milliseconds to minutes
+df['time'] /= 60000
+
+# Creates a new column for cumulative time
+df['cumulative_time'] = df['time'].cumsum()
+
+# Creates a Dash app
+app = dash.Dash(__name__)
+
+# app layout
+app.layout = html.Div([
+    dcc.Graph(id='time-series-plot'),  # Creates a plot area
+    dcc.RangeSlider(
+        id='chrg-range',
+        min=int(df['cumulative_time'].min()),  # Sets range slider min
+        max=int(df['cumulative_time'].max()),  # Sets range slider max
+        step=1,  
+        marks={i: str(i) for i in range(int(df['cumulative_time'].min()), int(df['cumulative_time'].max()) + 1)},  # Creates range slider marks
+        value=[int(df['cumulative_time'].min()), int(df['cumulative_time'].max())]  # Sets initial range
+    )
+])
+
+# time series plot
+@app.callback(
+    Output('time-series-plot', 'figure'),  # plot
+    [Input('chrg-range', 'value')]  #  range slider 
+)
+def update_time_series_plot(selected_range):
+    # Filters data based on the selected time range
+    filtered_data = df[(df['cumulative_time'] >= selected_range[0]) & (df['cumulative_time'] <= selected_range[1])]
+    # Defines the plot figure
+    figure = {
+        'data': [
+            {'x': filtered_data['cumulative_time'], 'y': 98 - filtered_data['chrg'], 'type': 'line', 'name': 'Charge'},
+            {'x': filtered_data['cumulative_time'], 'y': filtered_data['mv'], 'type': 'line', 'name': 'Voltage'}
+        ],
+        'layout': {
+            'title': 'Time Series Plot of Voltage and Charge',
+            'xaxis': {'title': 'Time '},
+            'yaxis': {'title': 'Voltage and Charge'}
+        }
+    }
+    return figure
+
+# Run the Dash app
+if __name__ == '__main__':
+    app.run_server(debug=True)
